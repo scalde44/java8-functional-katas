@@ -1,11 +1,11 @@
 package katas;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import util.DataUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /*
     Goal: Create a datastructure from the given data:
@@ -63,8 +63,25 @@ public class Kata11 {
         List<Map> boxArts = DataUtil.getBoxArts();
         List<Map> bookmarkList = DataUtil.getBookmarkList();
 
-        return ImmutableList.of(ImmutableMap.of("name", "someName", "videos", ImmutableList.of(
-                ImmutableMap.of("id", 5, "title", "The Chamber", "time", 123, "boxart", "someUrl")
-        )));
+        return lists.stream()
+                .map(genero ->
+                        Map.of("name", genero.get("name"),
+                                "videos", videos.stream()
+                                        .filter(video -> Objects.equals(genero.get("id"), video.get("listId")))
+                                        .map(
+                                                video -> Map.of("id", video.get("id"),
+                                                        "title", video.get("title"),
+                                                        "boxart", boxArts.stream()
+                                                                .filter(boxArt -> Objects.equals(boxArt.get("videoId"), video.get("id")))
+                                                                .map(boxArt -> boxArt.get("url")),
+                                                        "time", bookmarkList.stream()
+                                                                .filter(bookmark -> Objects.equals(bookmark.get("videoId"), video.get("id")))
+                                                                .map(bookmark -> bookmark.get("time"))
+                                                )
+                                        )
+                                        .collect(Collectors.toList())
+                        )
+                )
+                .collect(Collectors.toList());
     }
 }
